@@ -116,6 +116,7 @@ class V3Options {
     bool	m_decoration;	// main switch: --decoration
     bool        m_dumpDefines;  // main switch: --dump-defines
     bool	m_exe;		// main switch: --exe
+    bool	m_event_triggers; // main switch: --event-triggers
     bool	m_ignc;		// main switch: --ignc
     bool	m_inhibitSim;	// main switch: --inhibit-sim
     bool	m_lintOnly;	// main switch: --lint-only
@@ -282,6 +283,7 @@ class V3Options {
     bool debugSelfTest() const { return m_debugSelfTest; }
     bool decoration() const { return m_decoration; }
     bool dumpDefines() const { return m_dumpDefines; }
+    bool event_triggers() const { return m_event_triggers; }
     bool exe() const { return m_exe; }
     bool threadsDpiPure() const { return m_threadsDpiPure; }
     bool threadsDpiUnpure() const { return m_threadsDpiUnpure; }

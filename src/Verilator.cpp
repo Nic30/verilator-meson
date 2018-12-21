@@ -96,6 +96,7 @@
 
 #include <ctime>
 #include <sys/stat.h>
+#include <V3EventMarker.h>
 
 V3Global v3Global;
 
@@ -395,6 +396,9 @@ void process() {
 
 	// Change generated clocks to look at delayed signals
 	V3GenClk::genClkAll(v3Global.rootp());
+
+	// Add markers for starts of evaluation of edge dependent code
+	if (v3Global.opt.event_triggers()) V3EventMarker::eventMarkerAll(v3Global.rootp());
 
 	// Convert sense lists into IF statements.
 	V3Clock::clockAll(v3Global.rootp());
