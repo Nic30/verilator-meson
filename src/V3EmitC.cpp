@@ -2327,6 +2327,7 @@ void EmitCImp::emitIntFuncDecls(AstNodeModule* modp) {
 	    ofp()->putsPrivate(funcp->declPrivate());
 	    if (funcp->ifdef()!="") puts("#ifdef "+funcp->ifdef()+"\n");
 	    if (funcp->isStatic()) puts("static ");
+	    if (funcp->isVirtual()) puts("virtual ");
 	    puts(funcp->rtnTypeVoid()); puts(" ");
 	    puts(funcp->name()); puts("("+cFuncArgs(funcp)+");\n");
 	    if (funcp->ifdef()!="") puts("#endif // "+funcp->ifdef()+"\n");
@@ -2528,10 +2529,8 @@ void EmitCImp::emitInt(AstNodeModule* modp) {
     ofp()->putsPrivate(false);  // public:
     if (optSystemC() && modp->isTop()) {
 	puts("SC_CTOR("+modClassName(modp)+");\n");
-	puts("virtual ~"+modClassName(modp)+"();\n");
     } else if (optSystemC()) {
 	puts("VL_CTOR("+modClassName(modp)+");\n");
-	puts("~"+modClassName(modp)+"();\n");
     } else {
 	if (modp->isTop()) {
 	    puts("/// Construct the model; called by application code\n");
@@ -2540,8 +2539,8 @@ void EmitCImp::emitInt(AstNodeModule* modp) {
 	}
 	puts(modClassName(modp)+"(const char* name=\"TOP\");\n");
 	if (modp->isTop()) puts("/// Destroy the model; called (often implicitly) by application code\n");
-	puts("~"+modClassName(modp)+"();\n");
     }
+    puts("virtual ~"+modClassName(modp)+"();\n");
     if (v3Global.opt.trace()) {
 	if (modp->isTop()) puts("/// Trace signals in the model; called by application code\n");
         puts("void trace("+v3Global.opt.traceClassBase()+"C* tfp, int levels, int options=0);\n");

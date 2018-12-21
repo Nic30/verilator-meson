@@ -5535,6 +5535,7 @@ private:
     bool	m_funcPublic:1;		// From user public task/function
     bool	m_isInline:1;		// Inline function
     bool	m_isStatic:1;		// Function is declared static (no this)
+    bool	m_isVirtual:1;		// Function is declared as virtual
     bool	m_symProlog:1;		// Setup symbol table for later instructions
     bool	m_entryPoint:1;		// User may call into this top level function
     bool	m_pure:1;		// Pure function
@@ -5557,6 +5558,7 @@ public:
 	m_funcPublic = false;
 	m_isInline = false;
 	m_isStatic = true;	// Note defaults to static, later we see where thisp is needed
+	m_isVirtual = false;
 	m_symProlog = false;
 	m_entryPoint = false;
 	m_pure = false;
@@ -5609,6 +5611,8 @@ public:
     void	isInline(bool flag) { m_isInline = flag; }
     bool	isStatic() const { return m_isStatic; }
     void	isStatic(bool flag) { m_isStatic = flag; }
+    bool	isVirtual() const { return m_isVirtual; }
+    void	isVirtual(bool flag) { m_isVirtual = flag; }
     bool	symProlog() const { return m_symProlog; }
     void	symProlog(bool flag) { m_symProlog = flag; }
     bool	entryPoint() const { return m_entryPoint; }
