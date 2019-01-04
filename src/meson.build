@@ -2,9 +2,9 @@
 
 build_system = build_machine.system()
 # On Windows, if flex/bison aren't found, we use a subproject to get them
-flex = find_program('flex', 'win_flex', required : build_system != 'windows')
-bison = find_program('bison', 'win_bison', required : build_system != 'windows')
-yacc = find_program('yacc', 'win_bison', required : build_system != 'windows')
+flex = find_program('flex', required : build_system != 'windows')
+bison = find_program('bison', required : build_system != 'windows')
+yacc = find_program('yacc', required : build_system != 'windows')
 if not flex.found() or not bison.found() or not yacc.found()
   subproject('win-flex-bison-binaries')
   yacc = bison + ' -y ' 
@@ -163,4 +163,5 @@ incdir = include_directories('../include')
 executable('verilator_bin',
 	sources : [gen_src_cpp, gen_src_h, gen_rev_h,
 			   V3Lexer, V3PreLex] + base_srcs + nc_srcs,
-	include_directories : incdir)
+	include_directories : incdir,
+	install : true)
