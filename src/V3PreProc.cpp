@@ -37,9 +37,7 @@
 //======================================================================
 // Build in LEX script
 
-#define yyFlexLexer V3Lexer
-#include "V3PreLex.yy.cpp"
-#undef yyFlexLexer
+//#include "V3PreLex.yy.cpp"
 
 //YYSTYPE yylval;
 

@@ -3899,7 +3899,9 @@ vltOnFront<errcodeen>:
 
 int V3ParseImp::bisonParse() {
     // Use --debugi-bison 9 to enable this
+    #if YYDEBUG
     if (PARSEP->debugBison()>=9) yydebug = 1;
+    #endif
     return yyparse();
 }
 

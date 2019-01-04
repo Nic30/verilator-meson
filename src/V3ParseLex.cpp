@@ -32,18 +32,21 @@
 //======================================================================
 // Build in LEX script
 
-#define yyFlexLexer V3LexerBase
-#include "V3Lexer.yy.cpp"
 #undef yyFlexLexer
+#define yyFlexLexer V3LexerBaseFlexLexer
+#include <FlexLexer.h>
+#undef yyFlexLexer
+
+//#include "V3Lexer.yy.cpp"
 
 //######################################################################
 // Lex-derived class
 
 /// Override the base lexer class so we can add some access functions
-class V3Lexer : public V3LexerBase {
+class V3Lexer : public V3LexerBaseFlexLexer {
 public:
     // CONSTRUCTORS
-    V3Lexer() : V3LexerBase(NULL) {}
+    V3Lexer() : V3LexerBaseFlexLexer(NULL) {}
     ~V3Lexer() {}
     // METHODS
     void statePop() {
@@ -53,7 +56,7 @@ public:
         // Add characters to input stream in back-to-front order
         const char* cp = textp;
         for (cp += length - 1; length--; cp--) {
-            unput(*cp);
+        	yyunput(*cp, yytext);
         }
     }
 };

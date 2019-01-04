@@ -23,4 +23,6 @@
 
 //======================================================================
 // The guts came from bison
+#include "V3ParseImp.h"
+#include "V3ParseBison.h"
 #include "V3ParseBison.c"

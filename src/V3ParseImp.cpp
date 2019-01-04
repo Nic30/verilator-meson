@@ -36,6 +36,7 @@
 #include "V3File.h"
 #include "V3ParseImp.h"
 #include "V3PreShell.h"
+#include "verilog.l.h"
 
 #include <cstdarg>
 #include <fstream>
@@ -194,3 +195,87 @@ void V3Parse::parseFile(FileLine* fileline, const string& modname, bool inLibrar
 void V3Parse::ppPushText(V3ParseImp* impp, const string& text) {
     if (text != "") impp->ppPushText(text);
 }
+
+void V3ParseImp::ppline (const char* textp) {
+    // Handle `line directive
+    int enterExit;
+    fileline()->lineDirective(textp, enterExit/*ref*/);
+}
+
+void V3ParseImp::verilatorCmtLint(const char* textp, bool warnOff) {
+    const char* sp = textp;
+    while (*sp && !isspace(*sp)) sp++;
+    while (*sp && isspace(*sp)) sp++;
+
+    while (*sp && !isspace(*sp)) sp++;
+    while (*sp && isspace(*sp)) sp++;
+
+    string msg = sp;
+    string::size_type pos;
+    if ((pos = msg.find('*')) != string::npos) { msg.erase(pos); }
+    if (!(PARSEP->fileline()->warnOff(msg, warnOff))) {
+	if (!PARSEP->optFuture(msg)) {
+	    yyerrorf("Unknown verilator lint message code: %s, in %s",msg.c_str(), textp);
+	}
+    }
+}
+
+void V3ParseImp::verilatorCmtLintSave() {
+    m_lintState.push_back(*PARSEP->fileline());
+}
+void V3ParseImp::verilatorCmtLintRestore() {
+    if (m_lintState.empty()) {
+	yyerrorf("/*verilator lint_restore*/ without matching save.");
+	return;
+    }
+    PARSEP->fileline()->warnStateFrom(m_lintState.back());
+    m_lintState.pop_back();
+}
+
+void V3ParseImp::verilatorCmtBad(const char* textp) {
+    string cmtparse = textp;
+    if (cmtparse.substr(0,strlen("/*verilator")) == "/*verilator") {
+	cmtparse.replace(0,strlen("/*verilator"), "");
+    }
+    while (isspace(cmtparse[0])) {
+	cmtparse.replace(0,1, "");
+    }
+    string cmtname;
+    for (int i=0; isalnum(cmtparse[i]); i++) {
+	cmtname += cmtparse[i];
+    }
+    if (!PARSEP->optFuture(cmtname)) {
+	yyerrorf("Unknown verilator comment: %s",textp);
+    }
+}
+
+void V3ParseImp::tag(const char* text) {
+    if (m_tagNodep) {
+	string tmp = text + strlen("/*verilator tag ");
+	string::size_type pos;
+	if ((pos=tmp.rfind("*/")) != string::npos) { tmp.erase(pos); }
+        m_tagNodep->tag(tmp);
+    }
+}
+
+double V3ParseImp::parseDouble(const char* textp, size_t length, bool* successp) {
+    char* strgp = new char[length+1];
+    char* dp=strgp;
+    if (successp) *successp = true;
+    for (const char* sp=textp; sp<(textp+length); ++sp) {
+	if (*sp != '_') *dp++ = *sp;
+    }
+    *dp++ = '\0';
+    char* endp = strgp;
+    double d = strtod(strgp, &endp);
+    size_t parsed_len = endp-strgp;
+    if (parsed_len != strlen(strgp)) {
+        if (successp) *successp = false;
+        else yyerrorf("Syntax error parsing real: %s",strgp);
+    }
+    delete[] strgp;
+    return d;
+}
+
+
+

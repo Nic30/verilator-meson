@@ -17,6 +17,8 @@ my $opt_classes;
 my $opt_report;
 my @Opt_Cpt;
 my @Opt_I;
+my @Opt_out_dir;
+
 Getopt::Long::config ("pass_through", "no_auto_abbrev");
 if (! GetOptions (
           "help"        => \&usage,
@@ -36,15 +38,15 @@ if ($opt_report) {
     write_report(undef);
 }
 if ($opt_classes) {
-    write_report("V3Ast__gen_report.txt");
-    write_classes("V3Ast__gen_classes.h");
-    write_visitor("V3Ast__gen_visitor.h");
-    write_intf("V3Ast__gen_interface.h");
-    write_impl("V3Ast__gen_impl.h");
-    write_types("V3Ast__gen_types.h");
+    write_report("$Opt_out_dir[0]/V3Ast__gen_report.txt");
+    write_classes("$Opt_out_dir[0]/V3Ast__gen_classes.h");
+    write_visitor("$Opt_out_dir[0]/V3Ast__gen_visitor.h");
+    write_intf("$Opt_out_dir[0]/V3Ast__gen_interface.h");
+    write_impl("$Opt_out_dir[0]/V3Ast__gen_impl.h");
+    write_types("$Opt_out_dir[0]/V3Ast__gen_types.h");
 }
 foreach my $cpt (@Opt_Cpt) {
-    Cpt::process(in_filename=>"$Opt_I[0]/${cpt}.cpp", out_filename=>"${cpt}__gen.cpp");
+    Cpt::process(in_filename=>"$Opt_I[0]/${cpt}.cpp", out_filename=>"$Opt_out_dir[0]/${cpt}__gen.cpp");
 }
 
 #----------------------------------------------------------------------
@@ -60,6 +62,8 @@ sub parameter {
 	push @Opt_I, $1;
     } elsif ($param =~ s/\.cpp$//) {
 	push @Opt_Cpt, $param;
+	} elsif ($param =~ /^-o=(\S+)/) {
+	push @Opt_out_dir, $1;
     } else {
 	die "%Error: Unknown parameter: $param,";
     }

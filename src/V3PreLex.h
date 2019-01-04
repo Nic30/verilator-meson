@@ -27,6 +27,8 @@
 
 #include "V3Error.h"
 #include "V3FileLine.h"
+#include "V3File.h"
+
 
 #include <deque>
 #include <stack>
