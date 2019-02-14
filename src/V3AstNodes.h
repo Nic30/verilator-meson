@@ -5529,6 +5529,7 @@ private:
     string	m_rtnType;		// void, bool, or other return type
     string	m_argTypes;
     string	m_ifdef;		// #ifdef symbol around this function
+    VBoolOrUnknown m_isStatic;          // Function is declared static (no this)
     bool	m_dontCombine:1;	// V3Combine shouldn't compare this func tree, it's special
     bool	m_skipDecl:1;		// Don't declare it
     bool	m_declPrivate:1;	// Declare it private
