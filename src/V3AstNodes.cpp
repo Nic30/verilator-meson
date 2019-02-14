@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -761,7 +761,7 @@ void AstNode::addBeforeStmt(AstNode* newp, AstNode*) {
     this->backp()->addBeforeStmt(newp, this);
 }
 void AstNode::addNextStmt(AstNode* newp, AstNode*) {
-    if (!backp()) newp->v3fatalSrc("Can't find current statement to addBeforeStmt");
+    if (!backp()) newp->v3fatalSrc("Can't find current statement to addNextStmt");
     // Look up; virtual call will find where to put it
     this->backp()->addNextStmt(newp, this);
 }
@@ -929,8 +929,15 @@ void AstRange::dump(std::ostream& str) {
     if (littleEndian()) str<<" [LITTLE]";
 }
 void AstRefDType::dump(std::ostream& str) {
+    static bool s_recursing = false;
     this->AstNodeDType::dump(str);
-    if (defp()) { str<<" -> "; defp()->dump(str); }
+    if (defp()) {
+        if (!s_recursing) {  // Prevent infinite dump if circular typedefs
+            s_recursing = true;
+            str<<" -> "; defp()->dump(str);
+            s_recursing = false;
+        }
+    }
     else { str<<" -> UNLINKED"; }
 }
 void AstNodeClassDType::dump(std::ostream& str) {
@@ -1190,6 +1197,8 @@ void AstCFunc::dump(std::ostream& str) {
     this->AstNode::dump(str);
     if (slow()) str<<" [SLOW]";
     if (pure()) str<<" [PURE]";
+    if (isStatic().unknown()) str<<" [STATICU]";
+    else if (isStatic().trueU()) str<<" [STATIC]";
     if (dpiImport()) str<<" [DPII]";
     if (dpiExport()) str<<" [DPIX]";
     if (dpiExportWrapper()) str<<" [DPIXWR]";

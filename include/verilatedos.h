@@ -1,7 +1,7 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder. This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License.
 // Version 2.0.
@@ -271,6 +271,7 @@ typedef unsigned long long	vluint64_t;	///< 64-bit unsigned type
 // Alas cinttypes isn't that standard yet
 
 #ifdef _WIN32
+# define __STDC_FORMAT_MACROS 1  // Otherwise MinGW doesn't get PRId64 for fstapi.c
 # define VL_PRI64 "I64"
 #else  // Linux or compliant Unix flavors
 # if defined(__WORDSIZE) && (__WORDSIZE == 64)

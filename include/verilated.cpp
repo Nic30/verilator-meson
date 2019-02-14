@@ -1,7 +1,7 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder. This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License.
 // Version 2.0.
@@ -38,6 +38,16 @@
 #endif
 
 #define VL_VALUE_STRING_MAX_WIDTH 8192  ///< Max static char array for VL_VALUE_STRING
+
+//===========================================================================
+// Static sanity checks (when get C++11 can use static_assert)
+
+typedef union {
+    char vluint8_incorrect[(sizeof(vluint8_t) == 1) ? 1:-1];
+    char vluint16_incorrect[(sizeof(vluint16_t) == 2) ? 1:-1];
+    char vluint32_incorrect[(sizeof(vluint32_t) == 4) ? 1:-1];
+    char vluint64_incorrect[(sizeof(vluint64_t) == 8) ? 1:-1];
+} vl_static_checks_t;
 
 //===========================================================================
 // Global variables
@@ -198,6 +208,7 @@ void VL_PRINTF_MT(const char* formatp, ...) VL_MT_SAFE {
 
 Verilated::Serialized::Serialized() {
     s_randReset = 0;
+    s_randSeed = 0;
     s_debug = 0;
     s_calcUnusedSigs = false;
     s_gotFinish = false;
@@ -235,18 +246,25 @@ vluint64_t vl_rand64() VL_MT_SAFE {
     static VL_THREAD_LOCAL bool t_seeded = false;
     static VL_THREAD_LOCAL vluint64_t t_state[2];
     if (VL_UNLIKELY(!t_seeded)) {
-	t_seeded = true;
-	{
-	    VerilatedLockGuard lock(s_mutex);
-            t_state[0] = ((static_cast<vluint64_t>(vl_sys_rand32()) << 32)
-                          ^ (static_cast<vluint64_t>(vl_sys_rand32())));
-            t_state[1] = ((static_cast<vluint64_t>(vl_sys_rand32()) << 32)
-                          ^ (static_cast<vluint64_t>(vl_sys_rand32())));
+        t_seeded = true;
+        {
+            VerilatedLockGuard lock(s_mutex);
+            if (Verilated::randSeed() != 0) {
+                t_state[0] = ((static_cast<vluint64_t>(Verilated::randSeed()) << 32)
+                              ^ (static_cast<vluint64_t>(Verilated::randSeed())));
+                t_state[1] = ((static_cast<vluint64_t>(Verilated::randSeed()) << 32)
+                              ^ (static_cast<vluint64_t>(Verilated::randSeed())));
+            } else {
+                t_state[0] = ((static_cast<vluint64_t>(vl_sys_rand32()) << 32)
+                              ^ (static_cast<vluint64_t>(vl_sys_rand32())));
+                t_state[1] = ((static_cast<vluint64_t>(vl_sys_rand32()) << 32)
+                              ^ (static_cast<vluint64_t>(vl_sys_rand32())));
+            }
             // Fix state as algorithm is slow to randomize if many zeros
             // This causes a loss of ~ 1 bit of seed entropy, no big deal
             if (VL_COUNTONES_I(t_state[0]) < 10) t_state[0] = ~t_state[0];
             if (VL_COUNTONES_I(t_state[1]) < 10) t_state[1] = ~t_state[1];
-	}
+        }
     }
     // Xoroshiro128+ algorithm
     vluint64_t result = t_state[0] + t_state[1];
@@ -1660,6 +1678,10 @@ void Verilated::randReset(int val) VL_MT_SAFE {
     VerilatedLockGuard lock(m_mutex);
     s_s.s_randReset = val;
 }
+void Verilated::randSeed(int val) VL_MT_SAFE {
+    VerilatedLockGuard lock(m_mutex);
+    s_s.s_randSeed = val;
+}
 void Verilated::calcUnusedSigs(bool flag) VL_MT_SAFE {
     VerilatedLockGuard lock(m_mutex);
     s_s.s_calcUnusedSigs = flag;
@@ -1868,6 +1890,9 @@ void VerilatedImp::commandArgVl(const std::string& arg) {
         }
         else if (commandArgVlValue(arg, "+verilator+rand+reset+", value/*ref*/)) {
             Verilated::randReset(atoi(value.c_str()));
+        }
+        else if (commandArgVlValue(arg, "+verilator+seed+", value/*ref*/)) {
+            Verilated::randSeed(atoi(value.c_str()));
         }
         else if (arg == "+verilator+V") {
             versionDump();  // Someday more info too

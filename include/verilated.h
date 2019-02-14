@@ -1,7 +1,7 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder. This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder. This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License.
 // Version 2.0.
@@ -342,7 +342,8 @@ class Verilated {
 	bool		s_assertOn;		///< Assertions are enabled
         bool		s_fatalOnVpiError;	///< Stop on vpi error/unsupported
         // Slow path
-        int             s_randReset;            ///< Random reset: 0=all 0s, 1=all 1s, 2=random
+        int s_randReset;  ///< Random reset: 0=all 0s, 1=all 1s, 2=random
+        int s_randSeed;  ///< Random seed: 0=random
         Serialized();
         ~Serialized() {}
     } s_s;
@@ -396,6 +397,8 @@ public:
     /// 2 = Randomize all bits
     static void randReset(int val) VL_MT_SAFE;
     static int  randReset() VL_MT_SAFE { return s_s.s_randReset; }  ///< Return randReset value
+    static void randSeed(int val) VL_MT_SAFE;
+    static int  randSeed() VL_MT_SAFE { return s_s.s_randSeed; }  ///< Return randSeed value
 
     /// Enable debug of internal verilated code
     static void debug(int level) VL_MT_SAFE;

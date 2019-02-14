@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -1256,6 +1256,10 @@ private:
 	nodep->v3fatalSrc("For statements should have been converted to while statements in V3Begin.cpp");
     }
     virtual void visit(AstNodeStmt* nodep) {
+        if (!nodep->isStatement()) {
+            iterateChildren(nodep);
+            return;
+        }
 	m_insMode = IM_BEFORE;
 	m_insStmtp = nodep;
         iterateChildren(nodep);

@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -404,11 +404,11 @@ private:
 		// we'd need to initialize the variable to the initial
 		// condition, but they'll become while's which can be
 		// deleted by V3Const.
-		nodep->unlinkFrBack()->deleteTree(); VL_DANGLING(nodep);
-	    } else if (forUnrollCheck(nodep, nodep->initsp(),
-				      NULL, nodep->condp(),
-				      nodep->incsp(), nodep->bodysp())) {
-		pushDeletep(nodep); VL_DANGLING(nodep); // Did replacement
+                pushDeletep(nodep->unlinkFrBack()); VL_DANGLING(nodep);
+            } else if (forUnrollCheck(nodep, nodep->initsp(),
+                                      NULL, nodep->condp(),
+                                      nodep->incsp(), nodep->bodysp())) {
+                pushDeletep(nodep); VL_DANGLING(nodep);  // Did replacement
 	    } else {
 		nodep->v3error("For loop doesn't have genvar index, or is malformed");
 	    }
@@ -453,7 +453,13 @@ private:
 
 public:
     // CONSTUCTORS
-    UnrollVisitor(AstNode* nodep, bool generate, const string& beginName) {
+    UnrollVisitor() { init(false, ""); }
+    virtual ~UnrollVisitor() {
+        V3Stats::addStatSum("Optimizations, Unrolled Loops", m_statLoops);
+        V3Stats::addStatSum("Optimizations, Unrolled Iterations", m_statIters);
+    }
+    // METHORS
+    void init(bool generate, const string& beginName) {
 	m_forVarp = NULL;
 	m_forVscp = NULL;
         m_varValuep = NULL;
@@ -463,27 +469,33 @@ public:
         m_varAssignHit = false;
 	m_generate = generate;
 	m_beginName = beginName;
-	//
-        iterate(nodep);
     }
-    virtual ~UnrollVisitor() {
-	V3Stats::addStatSum("Optimizations, Unrolled Loops", m_statLoops);
-	V3Stats::addStatSum("Optimizations, Unrolled Iterations", m_statIters);
+    void process(AstNode* nodep, bool generate, const string& beginName) {
+        init(generate, beginName);
+        iterate(nodep);
     }
 };
 
 //######################################################################
 // Unroll class functions
 
+UnrollStateful::UnrollStateful() : m_unrollerp(new UnrollVisitor) { }
+UnrollStateful::~UnrollStateful() { delete m_unrollerp; }
+
+void UnrollStateful::unrollGen(AstNodeFor* nodep, const string& beginName) {
+    UINFO(5,__FUNCTION__<<": "<<endl);
+    m_unrollerp->process(nodep, true, beginName);
+}
+
+void UnrollStateful::unrollAll(AstNetlist* nodep) {
+    m_unrollerp->process(nodep, false, "");
+}
+
 void V3Unroll::unrollAll(AstNetlist* nodep) {
     UINFO(2,__FUNCTION__<<": "<<endl);
     {
-        UnrollVisitor visitor (nodep, false, "");
+        UnrollStateful unroller;
+        unroller.unrollAll(nodep);
     }  // Destruct before checking
     V3Global::dumpCheckGlobalTree("unroll", 0, v3Global.opt.dumpTreeLevel(__FILE__) >= 3);
-}
-
-void V3Unroll::unrollGen(AstNodeFor* nodep, const string& beginName) {
-    UINFO(5,__FUNCTION__<<": "<<endl);
-    UnrollVisitor visitor (nodep, true, beginName);
 }

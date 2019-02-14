@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2004-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2004-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -171,6 +171,23 @@ class EmitXmlFileVisitor : public AstNVisitor {
         outputTag(nodep, "");
         if (nodep->isModport()) mpn = nodep->modportName();
         puts(" modportname="); putsQuoted(mpn);
+        outputChildrenEnd(nodep, "");
+    }
+    virtual void visit(AstDisplay* nodep) {
+        outputTag(nodep, "");
+        puts(" displaytype="); putsQuoted(nodep->verilogKwd());
+        outputChildrenEnd(nodep, "");
+    }
+    virtual void visit(AstExtend* nodep) {
+        outputTag(nodep, "");
+        puts(" width="); putsQuoted(cvtToStr(nodep->width()));
+        puts(" widthminv="); putsQuoted(cvtToStr(nodep->lhsp()->widthMinV()));
+        outputChildrenEnd(nodep, "");
+    }
+    virtual void visit(AstExtendS* nodep) {
+        outputTag(nodep, "");
+        puts(" width="); putsQuoted(cvtToStr(nodep->width()));
+        puts(" widthminv="); putsQuoted(cvtToStr(nodep->lhsp()->widthMinV()));
         outputChildrenEnd(nodep, "");
     }
 

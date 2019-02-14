@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -1043,12 +1043,24 @@ private:
 	UINFO(4,"dtWidthed "<<nodep<<endl);
     }
     virtual void visit(AstRefDType* nodep) {
-	if (nodep->didWidthAndSet()) return;  // This node is a dtype & not both PRELIMed+FINALed
-	userIterateChildren(nodep, NULL);
-	if (nodep->subDTypep()) nodep->refDTypep(iterateEditDTypep(nodep, nodep->subDTypep()));
-	nodep->dtypeFrom(nodep->dtypeSkipRefp());
-	nodep->widthFromSub(nodep->subDTypep());
-	UINFO(4,"dtWidthed "<<nodep<<endl);
+        if (nodep->doingWidth()) {  // Early exit if have circular parameter definition
+            nodep->v3error("Typedef's type is circular: "<<nodep->prettyName());
+            nodep->dtypeSetLogicBool();
+            nodep->doingWidth(false);
+            return;
+        }
+        if (nodep->didWidthAndSet()) return;  // This node is a dtype & not both PRELIMed+FINALed
+        nodep->doingWidth(true);
+        userIterateChildren(nodep, NULL);
+        if (nodep->subDTypep()) nodep->refDTypep(iterateEditDTypep(nodep, nodep->subDTypep()));
+        // Effectively nodep->dtypeFrom(nodep->dtypeSkipRefp());
+        // But might be recursive, so instead manually recurse into the referenced type
+        if (!nodep->defp()) nodep->v3fatalSrc("Unlinked");
+        nodep->dtypeFrom(nodep->defp());
+        userIterate(nodep->defp(), NULL);
+        nodep->widthFromSub(nodep->subDTypep());
+        UINFO(4,"dtWidthed "<<nodep<<endl);
+        nodep->doingWidth(false);
     }
     virtual void visit(AstTypedef* nodep) {
 	if (nodep->didWidthAndSet()) return;  // This node is a dtype & not both PRELIMed+FINALed
@@ -1147,7 +1159,7 @@ private:
 		// We ignore warnings as that is sort of the point of a cast
 		iterateCheck(nodep,"Cast expr",nodep->lhsp(),CONTEXT,FINAL,calcDtp,EXTEND_EXP, false);
 	    }
-	    if (debug()) nodep->dumpTree(cout,"  CastSizeClc: ");
+	    //if (debug()) nodep->dumpTree(cout,"  CastSizeClc: ");
 	    // Next step, make the proper output width
 	    {
                 AstNodeDType* outDtp = (underDtp->isFourstate()

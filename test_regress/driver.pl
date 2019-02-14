@@ -900,7 +900,7 @@ sub execute {
 	$param{executable} ||= "$self->{obj_dir}/$param{VM_PREFIX}";
 	$self->_run(logfile=>"$self->{obj_dir}/vlt_sim.log",
 		    cmd=>[($run_env
-			   .($opt_gdbsim ? ("gdb"||$ENV{VERILATOR_GDB})." " : "")
+			   .($opt_gdbsim ? ($ENV{VERILATOR_GDB}||"gdb")." " : "")
 			   .$param{executable}
 			   .($opt_gdbsim ? " -ex 'run " : "")),
 			  @{$param{all_run_flags}},
@@ -1192,6 +1192,9 @@ sub _make_main {
 
     print $fh "// Test defines\n";
     print $fh "#define VL_TIME_MULTIPLIER $self->{vl_time_multiplier}\n" if $self->{vl_time_multiplier};
+
+    print $fh "// OS header\n";
+    print $fh "#include \"verilatedos.h\"\n";
 
     print $fh "// Generated header\n";
     my $VM_PREFIX = $self->{VM_PREFIX};
@@ -2206,7 +2209,7 @@ Command to use to invoke VCS.
 
 The latest version is available from L<http://www.veripool.org/>.
 
-Copyright 2003-2018 by Wilson Snyder.  Verilator is free software; you can
+Copyright 2003-2019 by Wilson Snyder.  Verilator is free software; you can
 redistribute it and/or modify it under the terms of either the GNU Lesser
 General Public License Version 3 or the Perl Artistic License Version 2.0.
 

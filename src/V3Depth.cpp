@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -102,7 +102,11 @@ private:
 	m_stmtp = NULL;
     }
     virtual void visit(AstNodeStmt* nodep) {
-	visitStmt(nodep);
+        if (!nodep->isStatement()) {
+            iterateChildren(nodep);
+        } else {
+            visitStmt(nodep);
+        }
     }
     // Operators
     virtual void visit(AstNodeTermop* nodep) {
@@ -126,10 +130,10 @@ private:
 
     //--------------------
     // Marking of non-static functions (because they might need "this")
-    // (Here just to avoid another iteration)
+    // (Here instead of new vistor after V3Descope just to avoid another visitor)
     void needNonStaticFunc(AstNode* nodep) {
-	if (!m_funcp) nodep->v3fatalSrc("Non-static accessor not under a function");
-	if (m_funcp->isStatic()) {
+        if (!m_funcp) nodep->v3fatalSrc("Non-static accessor not under a function");
+        if (m_funcp->isStatic().trueU()) {
 	    UINFO(5,"Mark non-public due to "<<nodep<<endl);
 	    m_funcp->isStatic(false);
 	}

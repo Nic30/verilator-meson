@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -135,10 +135,10 @@ private:
                                                     new AstVarRef(fl, varp, false)))),
                                     NULL);
             newp->branchPred(AstBranchPred::BP_LIKELY);
-	    if (debug()>=9) newp->dumpTree(cout,"     _new: ");
-	    abovep->addNextStmt(newp,abovep);
-	    prep->user2p(newp);  // Save so we may LogAnd it next time
-	}
+            if (debug()>=9) newp->dumpTree(cout,"     _new: ");
+            abovep->addNextStmt(newp, abovep);
+            prep->user2p(newp);  // Save so we may LogAnd it next time
+        }
     }
 
     // VISITORS

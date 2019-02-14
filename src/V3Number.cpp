@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -177,10 +177,9 @@ V3Number::V3Number(FileLine* fileline, const char* sourcep) {
     }
     else {
 	// Convert bin/octal number to hex
-	for (const char* cp=value_startp+strlen(value_startp)-1;
-	     (cp>=value_startp
-	      && obit<=width());
-	     cp--) {
+        for (const char* cp=value_startp+strlen(value_startp)-1;
+             cp >= value_startp;
+             cp--) {
 	    if (*cp!='_' && *cp!='0' && obit>=width()) {
 		m_fileline->v3error("Too many digits for "<<width()<<" bit number: "<<sourcep);
 		break;

@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -2326,7 +2326,7 @@ void EmitCImp::emitIntFuncDecls(AstNodeModule* modp) {
 	if (!funcp->dpiImport()) {  // DPI is prototyped in __Dpi.h
 	    ofp()->putsPrivate(funcp->declPrivate());
 	    if (funcp->ifdef()!="") puts("#ifdef "+funcp->ifdef()+"\n");
-	    if (funcp->isStatic()) puts("static ");
+	    if (funcp->isStatic().trueU()) puts("static ");
 	    if (funcp->isVirtual()) puts("virtual ");
 	    puts(funcp->rtnTypeVoid()); puts(" ");
 	    puts(funcp->name()); puts("("+cFuncArgs(funcp)+");\n");

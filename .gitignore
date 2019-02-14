@@ -31,3 +31,5 @@ verilator_bin*
 verilator_coverage_bin*
 verilator.pc
 **/obj_dir/*
+
+build/

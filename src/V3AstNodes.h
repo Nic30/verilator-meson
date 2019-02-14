@@ -6,7 +6,7 @@
 //
 //*************************************************************************
 //
-// Copyright 2003-2018 by Wilson Snyder.  This program is free software; you can
+// Copyright 2003-2019 by Wilson Snyder.  This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
 // Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
@@ -2026,6 +2026,7 @@ public:
     AstTaskRef(FileLine* fl, const string& name, AstNode* pinsp)
 	:AstNodeFTaskRef(fl, name, pinsp) {}
     ASTNODE_NODE_FUNCS(TaskRef)
+    virtual bool isStatement() const { return true; }  // A statement, unlike FuncRef
 };
 
 class AstFuncRef : public AstNodeFTaskRef {
@@ -2036,6 +2037,7 @@ public:
     AstFuncRef(FileLine* fl, const string& name, AstNode* pinsp)
 	:AstNodeFTaskRef(fl, name, pinsp) {}
     ASTNODE_NODE_FUNCS(FuncRef)
+    virtual bool isStatement() const { return false; }  // Not a statement, unlike TaskRef
     virtual bool hasDType() const { return true; }
 };
 
@@ -5534,7 +5536,6 @@ private:
     bool	m_slow:1;		// Slow routine, called once or just at init time
     bool	m_funcPublic:1;		// From user public task/function
     bool	m_isInline:1;		// Inline function
-    bool	m_isStatic:1;		// Function is declared static (no this)
     bool	m_isVirtual:1;		// Function is declared as virtual
     bool	m_symProlog:1;		// Setup symbol table for later instructions
     bool	m_entryPoint:1;		// User may call into this top level function
@@ -5546,8 +5547,9 @@ private:
 public:
     AstCFunc(FileLine* fl, const string& name, AstScope* scopep, const string& rtnType="")
 	: AstNode(fl) {
-	m_funcType = AstCFuncType::FT_NORMAL;
-	m_scopep = scopep;
+        m_funcType = AstCFuncType::FT_NORMAL;
+        m_isStatic = VBoolOrUnknown::BU_UNKNOWN;  // Unknown until see where thisp needed
+        m_scopep = scopep;
 	m_name = name;
 	m_rtnType = rtnType;
 	m_dontCombine = false;
@@ -5557,7 +5559,6 @@ public:
 	m_slow = false;
 	m_funcPublic = false;
 	m_isInline = false;
-	m_isStatic = true;	// Note defaults to static, later we see where thisp is needed
 	m_isVirtual = false;
 	m_symProlog = false;
 	m_entryPoint = false;
@@ -5582,7 +5583,10 @@ public:
 		    || name() == asamep->name())); }
     //
     virtual void name(const string& name) { m_name = name; }
-    virtual int instrCount()	const { return dpiImport() ? instrCountDpi() : 0; }
+    virtual int instrCount() const { return dpiImport() ? instrCountDpi() : 0; }
+    VBoolOrUnknown isStatic() const { return m_isStatic; }
+    void isStatic(bool flag) { m_isStatic = flag ? VBoolOrUnknown::BU_TRUE : VBoolOrUnknown::BU_FALSE; }
+    void isStatic(VBoolOrUnknown flag) { m_isStatic = flag; }
     void	cname(const string& name) { m_cname = name; }
     string	cname() const { return m_cname; }
     AstScope*	scopep() const { return m_scopep; }
@@ -5609,8 +5613,6 @@ public:
     AstCFuncType funcType() const { return m_funcType; }
     bool	isInline() const { return m_isInline; }
     void	isInline(bool flag) { m_isInline = flag; }
-    bool	isStatic() const { return m_isStatic; }
-    void	isStatic(bool flag) { m_isStatic = flag; }
     bool	isVirtual() const { return m_isVirtual; }
     void	isVirtual(bool flag) { m_isVirtual = flag; }
     bool	symProlog() const { return m_symProlog; }

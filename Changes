@@ -2,16 +2,36 @@ Revision history for Verilator
 
 The contributors that suggested a given feature are shown in []. Thanks!
 
+* Verilator 4.011 devel
 
-* Verilator 4.009 devel
+***   Add +verilator+seed, bug1396. [Stan Sokorac]
+
+****  Fix VERILATOR_GDB being ignored, msg2860. [Yu Sheng Lin]
+
+
+* Verilator 4.010 2019-01-27
 
 ***   Removed --trace-lxt2, use --trace-fst instead.
 
 ****  For --xml, add additional information, bug1372. [Jonathan Kimmitt]
 
+****  Add circular typedef error, bug1388.  [Al Grant]
+
+****  Add unsupported for loops error, msg2692. [Yu Sheng Lin]
+
 ****  Fix FST tracing of wide arrays, bug1376. [Aleksander Osman]
 
 ****  Fix error when pattern assignment has too few elements, bug1378. [Viktor Tomov]
+
+****  Fix error when no modules in $unit, bug1381. [Al Grant]
+
+****  Fix missing too many digits warning, bug1380. [Jonathan Kimmitt]
+
+****  Fix uninitialized data in verFiles and unroller, bug1385. bug1386. [Al Grant]
+
+****  Fix internal error on xrefs into unrolled functions, bug1387. [Al Grant]
+
+****  Fix DPI export void compiler error, bug1391. [Stan Sokorac]
 
 
 * Verilator 4.008 2018-12-01
@@ -3187,7 +3207,7 @@ of input ports exists for tracing.
 
 This uses outline mode in Emacs.  See C-h m [M-x describe-mode].
 
-Copyright 2001-2018 by Wilson Snyder.  This program is free software; you
+Copyright 2001-2019 by Wilson Snyder.  This program is free software; you
 can redistribute it and/or modify it under the terms of either the GNU
 Lesser General Public License Version 3 or the Perl Artistic License
 Version 2.0.
