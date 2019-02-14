@@ -109,7 +109,7 @@ EDA tools operate; to run you point to the tarball, no install is needed.
 
     export VERILATOR_ROOT=`pwd`   # if your shell is bash
     setenv VERILATOR_ROOT `pwd`   # if your shell is csh
-    ./configure
+    meson build
 
 =item 2.
 
@@ -119,7 +119,7 @@ and add it to path using Modules/modulecmd:
     unset VERILATOR_ROOT      # if your shell is bash
     unsetenv VERILATOR_ROOT   # if your shell is csh
     # For the tarball, use the version number instead of git describe
-    ./configure --prefix /CAD_DISK/verilator/`git describe | sed "s/verilator_//"`
+    meson build --prefix /CAD_DISK/verilator/`git describe | sed "s/verilator_//"`
 
     After installing you'll want a module file like the following:
 
@@ -135,7 +135,7 @@ The next option is to install it globally, using the normal system paths:
 
     unset VERILATOR_ROOT      # if your shell is bash
     unsetenv VERILATOR_ROOT   # if your shell is csh
-    ./configure
+    meson build
 
 =item 4.
 
@@ -144,7 +144,7 @@ most GNU tools support:
 
     unset VERILATOR_ROOT      # if your shell is bash
     unsetenv VERILATOR_ROOT   # if your shell is csh
-    ./configure --prefix /opt/verilator-VERSION
+    meson build --prefix /opt/verilator-VERSION
 
 Then after installing you will need to add /opt/verilator-VERSION/bin to
 PATH.
@@ -153,9 +153,9 @@ PATH.
 
 =item
 
-Type C<make> to compile Verilator.
+Type C<ninja> to compile Verilator.
 
-Type C<make test> to check the compilation.
+Type C<ninja test> to check the compilation.
 
 Configure with C<--enable-longtests> for more complete developer tests.
 Additional packages may be required for these tests.
@@ -171,12 +171,12 @@ environment variable VERILATOR_ROOT to point to this distribution, then
 execute $VERILATOR_ROOT/bin/verilator, which will find the path to all
 needed files.
 
-If you used the prefix scheme, now do a C<make install>.  To run verilator,
+If you used the prefix scheme, now do a C<ninja install>.  To run verilator,
 have the verilator binary directory in your PATH (this should already be
 true if using the default configure), and make sure VERILATOR_ROOT is not
 set.
 
-You may now wish to consult the examples directory. Type C<make> inside any
+You may now wish to consult the examples directory. Type C<ninja> inside any
 example directory to run the example.
 
 =back
